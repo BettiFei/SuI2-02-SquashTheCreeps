@@ -28,6 +28,12 @@ func _physics_process(delta: float) -> void:
 	if direction != Vector3.ZERO:
 		direction = direction.normalized()
 		$Pivot.basis = Basis.looking_at(direction)
+		if is_on_floor():
+			$AnimationPlayer.speed_scale = 4
+		elif not is_on_floor():
+			$AnimationPlayer.speed_scale = 0.5
+	else:
+		$AnimationPlayer.speed_scale = 1
 	
 	# ground velocity:
 	target_velocity.x = direction.x * speed
@@ -55,7 +61,7 @@ func _physics_process(delta: float) -> void:
 			var mob = collision.get_collider()
 			# if player hits mob from above, squash it & bounce off:
 			#print(Vector3.UP.dot(collision.get_normal()))
-			if Vector3.UP.dot(collision.get_normal()) > 0.6:
+			if Vector3.UP.dot(collision.get_normal()) > 0.5:
 				mob.squash()
 				target_velocity.y = bounce_impulse
 				# prevent further duplicate calls:
