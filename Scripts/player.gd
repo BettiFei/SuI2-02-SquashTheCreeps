@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+@export var hp = 5
 @export var speed = 14
 @export var fall_acceleration = 75
 @export var jump_impulse = 20
@@ -8,6 +9,7 @@ extends CharacterBody3D
 var target_velocity = Vector3.ZERO
 
 signal hit
+signal died
 
 func _physics_process(delta: float) -> void:
 	var direction = Vector3.ZERO
@@ -64,10 +66,15 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
+func take_hit():
+	hp -= 1
+	hit.emit(hp)
+	if hp < 1:
+		die()
+
 func die():
-	hit.emit()
+	died.emit()
 	queue_free()
 
-
-func _on_mob_detector_body_entered(body: Node3D) -> void:
-	die()
+func _on_mob_detector_body_entered(_body: Node3D) -> void:
+	take_hit()
