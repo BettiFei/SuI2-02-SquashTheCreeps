@@ -1,8 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://c2hm67m70f668"]
+[gd_scene load_steps=20 format=3 uid="uid://c2hm67m70f668"]
 
 [ext_resource type="Script" uid="uid://dogea32skktgw" path="res://Scripts/main.gd" id="1_8gbba"]
 [ext_resource type="PackedScene" uid="uid://cfy0gdifachde" path="res://Scenes/player.tscn" id="1_jjgbg"]
 [ext_resource type="PackedScene" uid="uid://br5qbqubc18cx" path="res://Scenes/mob.tscn" id="2_jjvhh"]
+[ext_resource type="Script" uid="uid://bsna1c348mffl" path="res://Scripts/camera_3d.gd" id="4_6bp64"]
 [ext_resource type="FontFile" uid="uid://cyxhh7ddkn62q" path="res://Assets/fonts/Montserrat-Medium.ttf" id="4_kry3j"]
 [ext_resource type="Script" uid="uid://d1ehg6ypxrs5c" path="res://Scripts/score_label.gd" id="5_21xkr"]
 [ext_resource type="Script" uid="uid://beajoiqn305sb" path="res://Scripts/health_bar.gd" id="7_6bp64"]
@@ -12,6 +13,50 @@ size = Vector3(60, 2, 60)
 
 [sub_resource type="BoxMesh" id="BoxMesh_jjgbg"]
 size = Vector3(60, 2, 60)
+
+[sub_resource type="Gradient" id="Gradient_21xkr"]
+offsets = PackedFloat32Array(0, 0.24, 0.74, 1)
+colors = PackedColorArray(0.6745098, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0.6745098, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_6bp64"]
+gradient = SubResource("Gradient_21xkr")
+
+[sub_resource type="Animation" id="Animation_344ge"]
+resource_name = "damage"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06666667, 0.3),
+"transitions": PackedFloat32Array(1, 0.48296833, 0.420448),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ynf5e"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hptm8"]
+_data = {
+&"RESET": SubResource("Animation_ynf5e"),
+&"damage": SubResource("Animation_344ge")
+}
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kry3j"]
 albedo_color = Color(0.8980096, 0.62719196, 0.18247429, 1)
@@ -30,6 +75,9 @@ point_count = 4
 [sub_resource type="Theme" id="Theme_6bp64"]
 default_font = ExtResource("4_kry3j")
 default_font_size = 22
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6bp64"]
+bg_color = Color(0.34486797, 0.5796473, 0.34896892, 1)
 
 [node name="Main" type="Node"]
 script = ExtResource("1_8gbba")
@@ -60,6 +108,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 19)
 projection = 1
 size = 19.0
 far = 100.0
+script = ExtResource("4_6bp64")
+
+[node name="TextureRect" type="TextureRect" parent="CameraPivot/Camera3D"]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_6bp64")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CameraPivot/Camera3D"]
+libraries = {
+&"": SubResource("AnimationLibrary_hptm8")
+}
 
 [node name="Cylinders" type="Node3D" parent="."]
 
@@ -115,6 +178,7 @@ offset_top = 29.0
 offset_right = 685.0
 offset_bottom = 61.0
 theme_override_colors/font_color = Color(0.15294118, 0.15294118, 0.15294118, 1)
+theme_override_styles/fill = SubResource("StyleBoxFlat_6bp64")
 value = 100.0
 show_percentage = false
 script = ExtResource("7_6bp64")
@@ -155,6 +219,6 @@ grow_vertical = 2
 text = "Press Enter To Retry."
 
 [connection signal="died" from="Player" to="." method="_on_player_died"]
-[connection signal="hit" from="Player" to="UserInterface/HealthLabel" method="_on_player_hit"]
+[connection signal="hit" from="Player" to="CameraPivot/Camera3D" method="_on_player_hit"]
 [connection signal="hit" from="Player" to="UserInterface/HealthBar" method="_on_player_hit"]
 [connection signal="timeout" from="MobTimer" to="." method="_on_mob_timer_timeout"]
